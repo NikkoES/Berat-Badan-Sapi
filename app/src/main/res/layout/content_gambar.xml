@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:layout_margin="8dp"
+    android:orientation="vertical"
+    app:layout_behavior="@string/appbar_scrolling_view_behavior"
+    tools:context="com.hello.beratbadansapi.GambarActivity"
+    tools:showIn="@layout/app_bar_gambar">
+
+    <Button
+        android:id="@+id/open_image"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Open Image" />
+
+    <ImageView
+        android:id="@+id/showImg"
+        android:layout_marginTop="10dp"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+
+
+
+</LinearLayout>
