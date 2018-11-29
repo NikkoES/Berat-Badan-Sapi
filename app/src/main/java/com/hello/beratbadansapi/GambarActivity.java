@@ -1,8 +1,6 @@
 package com.hello.beratbadansapi;
 
-import android.annotation.SuppressLint;
 import android.app.Activity;
-import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
@@ -18,42 +16,38 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.os.StrictMode;
 import android.provider.MediaStore;
-import android.support.design.widget.NavigationView;
-import android.support.v4.view.GravityCompat;
-import android.support.v4.widget.DrawerLayout;
-import android.support.v7.app.ActionBarDrawerToggle;
-import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.Toolbar;
-import android.text.TextUtils;
 import android.util.Log;
-import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
-import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.bumptech.glide.Glide;
-import com.bumptech.glide.load.engine.DiskCacheStrategy;
+import com.hello.beratbadansapi.data.TrainingData;
+import com.hello.beratbadansapi.model.DataSet;
 import com.soundcloud.android.crop.Crop;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
+import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import java.util.Locale;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
-import pl.aprilapps.easyphotopicker.EasyImage;
 
 public class GambarActivity extends AppCompatActivity {
 
@@ -84,12 +78,32 @@ public class GambarActivity extends AppCompatActivity {
     LinearLayout layoutLebarDada;
     @BindView(R.id.layout_morfologi)
     LinearLayout layoutMorfologi;
+    @BindView(R.id.txt_deskripsi_pixel)
+    TextView txtDeskripsiPixel;
+    @BindView(R.id.txt_deskripsi_cm)
+    TextView txtDeskripsiCm;
+    @BindView(R.id.txt_berat_badan)
+    TextView txtBeratBadan;
+
+    @BindView(R.id.btn_gray_scale)
+    Button btnGrayScale;
+    @BindView(R.id.btn_biner)
+    Button btnBiner;
+    @BindView(R.id.btn_panjang_badan)
+    Button btnPanjangBadan;
+    @BindView(R.id.btn_lebar_dada)
+    Button btnLebarDada;
+    @BindView(R.id.btn_tinggi_badan)
+    Button btnTinggiBadan;
+    @BindView(R.id.btn_proses_morfologi)
+    Button btnMorfologi;
 
     Intent intent;
     Uri fileUri, uriBitmap;
     String path;
 
     Bitmap bitmap, decoded, bitmapGrayscale, bitmapBiner, bitmapPanjangBadan, bitmapLebarBadan, bitmapTinggiBadan;
+    int panjangBadan, lebarDada, tinggiBadan;
 
     public final int REQUEST_CAMERA = 0;
     public final int SELECT_FILE = 1;
@@ -99,12 +113,65 @@ public class GambarActivity extends AppCompatActivity {
     int bitmap_size = 40; // image quality 1 - 100;
     int max_resolution_image = 800;
 
+    List<DataSet> listDataTraining = new ArrayList<>();
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_gambar);
         ButterKnife.bind(this);
         initToolbar();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        loadTrainingData();
+    }
+
+    private void loadTrainingData() {
+        try {
+            JSONObject jsonObject = new JSONObject(TrainingData.DATA_SET_SATU);
+            JSONArray arrayTraining = jsonObject.getJSONArray("data");
+            for (int i = 0; i < arrayTraining.length(); i++) {
+                JSONObject data = arrayTraining.getJSONObject(i);
+                listDataTraining.add(new DataSet(
+                        data.getString("umur"),
+                        data.getString("jeniskelamin"),
+                        data.getInt("tinggibadan"),
+                        data.getInt("lebardada"),
+                        data.getInt("panjangbadan"),
+                        data.getInt("beratbadan")));
+            }
+            JSONObject jsonObject2 = new JSONObject(TrainingData.DATA_SET_DUA);
+            JSONArray arrayTraining2 = jsonObject2.getJSONArray("data");
+            for (int i = 0; i < arrayTraining2.length(); i++) {
+                JSONObject data = arrayTraining2.getJSONObject(i);
+                listDataTraining.add(new DataSet(
+                        data.getString("umur"),
+                        data.getString("jeniskelamin"),
+                        data.getInt("tinggibadan"),
+                        data.getInt("lebardada"),
+                        data.getInt("panjangbadan"),
+                        data.getInt("beratbadan")));
+            }
+            JSONObject jsonObject3 = new JSONObject(TrainingData.DATA_SET_TIGA);
+            JSONArray arrayTraining3 = jsonObject3.getJSONArray("data");
+            for (int i = 0; i < arrayTraining3.length(); i++) {
+                JSONObject data = arrayTraining3.getJSONObject(i);
+                listDataTraining.add(new DataSet(
+                        data.getString("umur"),
+                        data.getString("jeniskelamin"),
+                        data.getInt("tinggibadan"),
+                        data.getInt("lebardada"),
+                        data.getInt("panjangbadan"),
+                        data.getInt("beratbadan")));
+            }
+
+            Log.e("jumlah data", "" + listDataTraining.size());
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
     }
 
     @OnClick({R.id.btn_choose_image, R.id.btn_gray_scale, R.id.btn_biner, R.id.btn_panjang_badan, R.id.btn_tinggi_badan, R.id.btn_lebar_dada, R.id.btn_proses_morfologi})
@@ -114,12 +181,14 @@ public class GambarActivity extends AppCompatActivity {
         switch (v.getId()) {
             case R.id.btn_choose_image:
                 selectImage();
+                btnGrayScale.setFocusable(true);
                 break;
             case R.id.btn_gray_scale:
                 imageGrayscale.setImageBitmap(convertToGrayscale(decoded));
                 util = (BitmapDrawable) imageGrayscale.getDrawable();
                 bitmapGrayscale = util.getBitmap();
                 layoutBiner.setVisibility(View.VISIBLE);
+                btnBiner.setFocusable(true);
                 break;
             case R.id.btn_biner:
                 imageBiner.setImageBitmap(convertToBinary(bitmapGrayscale));
@@ -127,27 +196,77 @@ public class GambarActivity extends AppCompatActivity {
                 bitmapBiner = util.getBitmap();
                 bitmapBiner.compress(Bitmap.CompressFormat.JPEG, 100, bytes);
                 layoutPanjangBadan.setVisibility(View.VISIBLE);
+                btnPanjangBadan.setFocusable(true);
                 convertToUri(bitmapBiner);
                 break;
             case R.id.btn_panjang_badan:
                 request = 0;
                 beginCrop(uriBitmap);
                 layoutTinggiBadan.setVisibility(View.VISIBLE);
+                btnTinggiBadan.setFocusable(true);
                 break;
             case R.id.btn_tinggi_badan:
                 request = 1;
                 beginCrop(uriBitmap);
                 layoutLebarDada.setVisibility(View.VISIBLE);
+                btnLebarDada.setFocusable(true);
                 break;
             case R.id.btn_lebar_dada:
                 request = 2;
                 beginCrop(uriBitmap);
                 layoutMorfologi.setVisibility(View.VISIBLE);
+                btnMorfologi.setFocusable(true);
                 break;
             case R.id.btn_proses_morfologi:
-                Toast.makeText(GambarActivity.this, "On Development !", Toast.LENGTH_SHORT).show();
+                imagePanjangBadan.setDrawingCacheEnabled(true);
+                imageLebarDada.setDrawingCacheEnabled(true);
+                imageTinggiBadan.setDrawingCacheEnabled(true);
+
+                bitmapPanjangBadan = imagePanjangBadan.getDrawingCache();
+                bitmapTinggiBadan = imageTinggiBadan.getDrawingCache();
+                bitmapLebarBadan = imageLebarDada.getDrawingCache();
+
+                panjangBadan = bitmapPanjangBadan.getWidth();
+                tinggiBadan = bitmapTinggiBadan.getHeight();
+                lebarDada = bitmapLebarBadan.getHeight();
+
+                DecimalFormat df = new DecimalFormat("###.##");
+
+                txtDeskripsiPixel.setText("=== UKURAN PIXEL ===\n" +
+                        "Tinggi Badan : " + tinggiBadan + "\n" +
+                        "Lebar Dada : " + lebarDada + "\n" +
+                        "Panjang Badan : " + panjangBadan);
+
+                int cmTinggiBadan = convertToCm(tinggiBadan) * 10;
+                int cmLebarDada = convertToCm(lebarDada) * 10;
+                int cmPanjangBadan = convertToCm(panjangBadan) * 10;
+
+                int beratBadan = 0;
+
+                txtDeskripsiCm.setText("\n=== UKURAN CENTIMETER ===\n" +
+                        "Tinggi Badan : " + cmTinggiBadan + "\n" +
+                        "Lebar Dada : " + cmLebarDada + "\n" +
+                        "Panjang Badan : " + cmPanjangBadan);
+
+                for (int i = 0; i < listDataTraining.size(); i++) {
+                    if (listDataTraining.get(i).getTinggiBadan() == cmTinggiBadan && listDataTraining.get(i).getLebarDada() == cmLebarDada && listDataTraining.get(i).getPanjangBadan() == cmPanjangBadan) {
+                        beratBadan = listDataTraining.get(i).getBobotBadan();
+                        break;
+                    }
+                }
+
+                if (beratBadan != 0) {
+                    txtBeratBadan.setText("\nBerat Badan : " + beratBadan + " KG");
+                } else {
+                    txtBeratBadan.setText("\nBerat Badan : Tidak ditemukan kecocokan !");
+                }
+
                 break;
         }
+    }
+
+    private int convertToCm(int pixelValue) {
+        return (int) (pixelValue * 2.54 / 96);
     }
 
     @Override
@@ -190,7 +309,7 @@ public class GambarActivity extends AppCompatActivity {
 
     private void beginCrop(Uri source) {
         Uri destination = Uri.fromFile(new File(getCacheDir(), "cropped"));
-        Crop.of(source, destination).asSquare().start(this);
+        Crop.of(source, destination).start(this);
     }
 
     private void handleCrop(int resultCode, Intent result, ImageView imageView) {
