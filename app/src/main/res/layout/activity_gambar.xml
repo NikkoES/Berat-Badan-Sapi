@@ -40,37 +40,6 @@
         </LinearLayout>
 
         <LinearLayout
-            android:id="@+id/layout_grayscale"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="10dp"
-            android:orientation="vertical"
-            android:visibility="gone">
-
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Gambar Grayscale"
-                android:textColor="@color/colorPrimary"
-                android:textSize="16sp"
-                android:textStyle="bold" />
-
-            <Button
-                android:id="@+id/btn_gray_scale"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:drawableLeft="@android:drawable/ic_menu_camera"
-                android:text="proses grayscale" />
-
-            <ImageView
-                android:id="@+id/image_grayscale"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:scaleType="fitXY" />
-
-        </LinearLayout>
-
-        <LinearLayout
             android:id="@+id/layout_biner"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"

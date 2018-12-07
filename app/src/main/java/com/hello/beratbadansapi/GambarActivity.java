@@ -53,8 +53,6 @@ public class GambarActivity extends AppCompatActivity {
 
     @BindView(R.id.image_original)
     ImageView imageOriginal;
-    @BindView(R.id.image_grayscale)
-    ImageView imageGrayscale;
     @BindView(R.id.image_biner)
     ImageView imageBiner;
     @BindView(R.id.image_panjang_badan)
@@ -66,8 +64,6 @@ public class GambarActivity extends AppCompatActivity {
 
     @BindView(R.id.layout_original)
     LinearLayout layoutOriginal;
-    @BindView(R.id.layout_grayscale)
-    LinearLayout layoutGrayscale;
     @BindView(R.id.layout_biner)
     LinearLayout layoutBiner;
     @BindView(R.id.layout_panjang_badan)
@@ -85,8 +81,6 @@ public class GambarActivity extends AppCompatActivity {
     @BindView(R.id.txt_berat_badan)
     TextView txtBeratBadan;
 
-    @BindView(R.id.btn_gray_scale)
-    Button btnGrayScale;
     @BindView(R.id.btn_biner)
     Button btnBiner;
     @BindView(R.id.btn_panjang_badan)
@@ -102,7 +96,7 @@ public class GambarActivity extends AppCompatActivity {
     Uri fileUri, uriBitmap;
     String path;
 
-    Bitmap bitmap, decoded, bitmapGrayscale, bitmapBiner, bitmapPanjangBadan, bitmapLebarBadan, bitmapTinggiBadan;
+    Bitmap bitmap, decoded, bitmapBiner, bitmapPanjangBadan, bitmapLebarBadan, bitmapTinggiBadan;
     int panjangBadan, lebarDada, tinggiBadan;
 
     public final int REQUEST_CAMERA = 0;
@@ -174,24 +168,17 @@ public class GambarActivity extends AppCompatActivity {
         }
     }
 
-    @OnClick({R.id.btn_choose_image, R.id.btn_gray_scale, R.id.btn_biner, R.id.btn_panjang_badan, R.id.btn_tinggi_badan, R.id.btn_lebar_dada, R.id.btn_proses_morfologi})
+    @OnClick({R.id.btn_choose_image, R.id.btn_biner, R.id.btn_panjang_badan, R.id.btn_tinggi_badan, R.id.btn_lebar_dada, R.id.btn_proses_morfologi})
     public void actionButton(View v) {
         BitmapDrawable util;
         ByteArrayOutputStream bytes = new ByteArrayOutputStream();
         switch (v.getId()) {
             case R.id.btn_choose_image:
                 selectImage();
-                btnGrayScale.setFocusable(true);
-                break;
-            case R.id.btn_gray_scale:
-                imageGrayscale.setImageBitmap(convertToGrayscale(decoded));
-                util = (BitmapDrawable) imageGrayscale.getDrawable();
-                bitmapGrayscale = util.getBitmap();
-                layoutBiner.setVisibility(View.VISIBLE);
                 btnBiner.setFocusable(true);
                 break;
             case R.id.btn_biner:
-                imageBiner.setImageBitmap(convertToBinary(bitmapGrayscale));
+                imageBiner.setImageBitmap(convertToBinary(decoded));
                 util = (BitmapDrawable) imageBiner.getDrawable();
                 bitmapBiner = util.getBitmap();
                 bitmapBiner.compress(Bitmap.CompressFormat.JPEG, 100, bytes);
@@ -230,7 +217,7 @@ public class GambarActivity extends AppCompatActivity {
                 tinggiBadan = bitmapTinggiBadan.getHeight();
                 lebarDada = bitmapLebarBadan.getHeight();
 
-                DecimalFormat df = new DecimalFormat("###.##");
+                DecimalFormat df = new DecimalFormat("#.##");
 
                 txtDeskripsiPixel.setText("=== UKURAN PIXEL ===\n" +
                         "Tinggi Badan : " + tinggiBadan + "\n" +
@@ -248,8 +235,17 @@ public class GambarActivity extends AppCompatActivity {
                         "Lebar Dada : " + cmLebarDada + "\n" +
                         "Panjang Badan : " + cmPanjangBadan);
 
+                double temp = (double) cmLebarDada / cmTinggiBadan;
+
+                double index = Double.parseDouble(df.format(temp));
+
                 for (int i = 0; i < listDataTraining.size(); i++) {
-                    if (listDataTraining.get(i).getTinggiBadan() == cmTinggiBadan && listDataTraining.get(i).getLebarDada() == cmLebarDada && listDataTraining.get(i).getPanjangBadan() == cmPanjangBadan) {
+                    double trainTemp = (double) listDataTraining.get(i).getLebarDada() / listDataTraining.get(i).getTinggiBadan();
+                    double trainIndex = Double.parseDouble(df.format(trainTemp));
+
+                    Log.e("INDEX", "" + index + " | " + trainIndex);
+
+                    if (index == trainIndex) {
                         beratBadan = listDataTraining.get(i).getBobotBadan();
                         break;
                     }
@@ -406,7 +402,7 @@ public class GambarActivity extends AppCompatActivity {
 
         //menampilkan gambar yang dipilih dari camera/gallery ke ImageView
         imageOriginal.setImageBitmap(decoded);
-        layoutGrayscale.setVisibility(View.VISIBLE);
+        layoutBiner.setVisibility(View.VISIBLE);
     }
 
     // Untuk resize bitmap
